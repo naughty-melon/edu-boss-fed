@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Layout from '@/layout/index.vue'
+import store from '@/store'
 
 Vue.use(VueRouter)
 
@@ -14,9 +15,12 @@ const routes: Array<RouteConfig> = [
   {
     path: '/',
     component: Layout,
+    meta: {
+      requiresAuth: true // 自定义数据，meta默认是一个空对象
+    },
     children: [
       {
-        path: '/',
+        path: '',
         name: 'home',
         component: () => import(/* webpackChunkName: 'login' */ '@/views/home/index.vue')
       },
@@ -66,6 +70,25 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   routes
+})
+
+// 全局前置守卫
+router.beforeEach((to, from, next) => {
+  console.log('to => ', to)
+  console.log('from => ', from)
+  // 路由守卫中一定要调用next，否则页面无法展示
+  // to.matched是一个数组
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!store.state.user) {
+      next({
+        name: 'login'
+      })
+    } else {
+      next()
+    }
+  } else {
+    next()
+  }
 })
 
 export default router
