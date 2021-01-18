@@ -11,11 +11,7 @@
         <el-avatar
           shape="square"
           :size="40"
-<<<<<<< HEAD
-          :src="userInfo.portrait || require('@/assets/avatar.png')"
-=======
           :src="userInfo.portrait || require('@/assets/default-avatar.png')"
->>>>>>> c775eb5e9e34647a8eb8decc2d5b779e82d92aa3
         ></el-avatar>
         <i class="el-icon-arrow-down el-icon--right"></i>
       </span>
