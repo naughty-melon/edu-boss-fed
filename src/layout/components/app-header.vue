@@ -11,7 +11,11 @@
         <el-avatar
           shape="square"
           :size="40"
+<<<<<<< HEAD
           :src="userInfo.portrait || require('@/assets/avatar.png')"
+=======
+          :src="userInfo.portrait || require('@/assets/default-avatar.png')"
+>>>>>>> c775eb5e9e34647a8eb8decc2d5b779e82d92aa3
         ></el-avatar>
         <i class="el-icon-arrow-down el-icon--right"></i>
       </span>
@@ -45,15 +49,15 @@ export default Vue.extend({
       const { data } = await getUserInfo()
       this.userInfo = data.content
     },
-    async handleLogout () {
-      this.$confirm('确定退出吗?', '提示', {
+    handleLogout () {
+      this.$confirm('确定退出吗？', '退出提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         // 清除登录状态
         this.$store.commit('setUser', null)
-        // 跳转到登录页
+        // 跳转到登录页面
         this.$router.push({
           name: 'login'
         })
@@ -64,7 +68,7 @@ export default Vue.extend({
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '退出取消'
+          message: '已取消退出'
         })
       })
     }
