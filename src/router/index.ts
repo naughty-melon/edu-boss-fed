@@ -74,14 +74,15 @@ const router = new VueRouter({
 
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
-  console.log('to => ', to)
-  console.log('from => ', from)
   // 路由守卫中一定要调用next，否则页面无法展示
   // to.matched是一个数组
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!store.state.user) {
       next({
-        name: 'login'
+        name: 'login',
+        query: { // 通过url传递查询字符串参数
+          redirect: to.fullPath // 把登录成功需要返回的页面告诉登录页面
+        }
       })
     } else {
       next()
