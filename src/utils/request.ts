@@ -10,25 +10,6 @@ const request = axios.create({
   // timeout
 })
 
-const redirectLogin = () => {
-  router.push({
-    name: 'login',
-    query: {
-      redirect: router.currentRoute.fullPath
-    }
-  })
-}
-
-async function refreshToken () {
-  return await axios.create()({
-    method: 'POST',
-    url: '/front/user/refresh_token',
-    data: qs.stringify({
-      refreshtoken: store.state.user.refresh_token
-    })
-  })
-}
-
 // 请求拦截器
 request.interceptors.request.use(function (config) {
   // 我们在这里通过改写config配置信息来实现业务功能的统一处理
@@ -42,9 +23,27 @@ request.interceptors.request.use(function (config) {
   // Do something with request error
   return Promise.reject(error)
 })
+
 // 响应拦截器
 let isRefreshing = false // 控制刷新token的状态
 let requests: any[] = []
+const redirectLogin = () => {
+  router.push({
+    name: 'login',
+    query: {
+      redirect: router.currentRoute.fullPath
+    }
+  })
+}
+async function refreshToken () {
+  return await axios.create()({
+    method: 'POST',
+    url: '/front/user/refresh_token',
+    data: qs.stringify({
+      refreshtoken: store.state.user.refresh_token
+    })
+  })
+}
 request.interceptors.response.use(function (response) {
   // 状态码为2xx的都会进入这里
   // 如果是自定义错误状态码，错误处理就写到这里
@@ -69,12 +68,13 @@ request.interceptors.response.use(function (response) {
         // 尝试刷新获取新的token
         return refreshToken().then(res => {
           if (!res.data.success) {
+            // 刷新获取新的token接口重复的情况，抛出错误
             throw new Error('刷新Token失败')
           }
-          // 成功了->把本次失败的请求重新发出去
+          // 刷新获取新的token接口成功了
           // 把刷新拿到的新的access_token更新到容器和本地存储中
           store.commit('setUser', res.data.content)
-          // 把reauests队列中的请求重新发出去
+          // 把reauests队列中失败的请求重新发出去
           requests.forEach(cb => cb())
           // 重置requests数组
           requests = []
@@ -82,7 +82,7 @@ request.interceptors.response.use(function (response) {
         }).catch(err => {
           // 把当前登录用户状态清除
           store.commit('setUser', null)
-          // 失败了->跳转到登录页重新获取新的token
+          // 刷新获取新的token接口失败了->跳转到登录页重新获取新的token
           redirectLogin()
           return Promise.reject(err)
         }).finally(() => {
